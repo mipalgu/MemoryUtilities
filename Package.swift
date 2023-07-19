@@ -9,7 +9,11 @@ let package = Package(
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
             name: "MemoryUtilities",
-            targets: ["MemoryUtilities"]),
+            targets: ["MemoryUtilities"]
+        )
+    ],
+    dependencies: [
+        .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.1.0")
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -18,6 +22,7 @@ let package = Package(
             name: "MemoryUtilities"),
         .testTarget(
             name: "MemoryUtilitiesTests",
-            dependencies: ["MemoryUtilities"]),
+            dependencies: ["MemoryUtilities"]
+        )
     ]
 )
