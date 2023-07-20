@@ -1,1 +1,11 @@
 # MemoryUtilities
+[![Swift Coverage Test](https://github.com/mipalgu/MemoryUtilities/actions/workflows/cov.yml/badge.svg)](https://github.com/mipalgu/MemoryUtilities/actions/workflows/cov.yml)
+[![MacOS Ventura Swift Debug CI](https://github.com/mipalgu/MemoryUtilities/actions/workflows/ci-macOS13-debug.yml/badge.svg)](https://github.com/mipalgu/MemoryUtilities/actions/workflows/ci-macOS13-debug.yml)
+[![MacOS Monterey Swift Debug CI](https://github.com/mipalgu/MemoryUtilities/actions/workflows/ci-macOS-debug.yml/badge.svg)](https://github.com/mipalgu/MemoryUtilities/actions/workflows/ci-macOS-debug.yml)
+[![Ubuntu 20.04 Swift Release CI](https://github.com/mipalgu/MemoryUtilities/actions/workflows/ci-linux-release.yml/badge.svg)](https://github.com/mipalgu/MemoryUtilities/actions/workflows/ci-linux-release.yml)
+[![Ubuntu 20.04 Swift Debug CI](https://github.com/mipalgu/MemoryUtilities/actions/workflows/ci-linux-debug.yml/badge.svg)](https://github.com/mipalgu/MemoryUtilities/actions/workflows/ci-linux-debug.yml)
+[![Ubuntu 22.04 Swift Debug CI](https://github.com/mipalgu/MemoryUtilities/actions/workflows/ci-linux-debug-22_04.yml/badge.svg)](https://github.com/mipalgu/MemoryUtilities/actions/workflows/ci-linux-debug-22_04.yml)
+[![Ubuntu 22.04 Swift Release CI](https://github.com/mipalgu/MemoryUtilities/actions/workflows/ci-linux-release-22_04.yml/badge.svg)](https://github.com/mipalgu/MemoryUtilities/actions/workflows/ci-linux-release-22_04.yml)
+[![Swift Lint](https://github.com/mipalgu/MemoryUtilities/actions/workflows/swiftlint.yml/badge.svg)](https://github.com/mipalgu/MemoryUtilities/actions/workflows/swiftlint.yml)
+[![MacOS Monterey Swift Release CI](https://github.com/mipalgu/MemoryUtilities/actions/workflows/ci-macOS-release.yml/badge.svg)](https://github.com/mipalgu/MemoryUtilities/actions/workflows/ci-macOS-release.yml)
+[![MacOS Ventura Swift Release CI](https://github.com/mipalgu/MemoryUtilities/actions/workflows/ci-macOS13-release.yml/badge.svg)](https://github.com/mipalgu/MemoryUtilities/actions/workflows/ci-macOS13-release.yml)
