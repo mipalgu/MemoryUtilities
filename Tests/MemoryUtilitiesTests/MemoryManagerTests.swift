@@ -104,6 +104,7 @@ final class MemoryManagerTests: XCTestCase {
         XCTAssertNil(MemoryManager(location: dataStore, baseAddress: 0, size: 0))
         XCTAssertNil(MemoryManager(location: dataStore, baseAddress: 0, size: 3))
         XCTAssertNil(MemoryManager(location: dataStore, baseAddress: 1, size: 4))
+        XCTAssertNil(MemoryManager(location: dataStore, baseAddress: 4, size: 4))
     }
 
     /// Test read returns correct data.
@@ -145,6 +146,19 @@ final class MemoryManagerTests: XCTestCase {
         XCTAssertFalse(manager.isValidAddress(address: 9))
         XCTAssertFalse(manager.isValidAddress(address: 3))
         XCTAssertFalse(manager.isValidAddress(address: 36))
+    }
+
+    /// Test `wite` correctly writes data.
+    func testWrite() {
+        XCTAssertTrue(manager.write(address: 0, value: 0x8BADF00D))
+        XCTAssertEqual(manager.memory[0], 0x8BADF00D)
+        XCTAssertEqual(manager.memory[1], 0xDEADBEEF)
+        XCTAssertFalse(manager.write(address: 1, value: 0x8BADF00D))
+        XCTAssertFalse(manager.write(address: 32, value: 0x8BADF00D))
+        XCTAssertTrue(manager.write(address: 16, value: 0x8BADF00D))
+        XCTAssertEqual(manager.memory[4], 0x8BADF00D)
+        XCTAssertEqual(manager.memory[3], 0)
+        XCTAssertEqual(manager.memory[5], 0)
     }
 
 }
