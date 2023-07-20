@@ -64,35 +64,87 @@ final class MemoryManagerTests: XCTestCase {
         .pathComponents.prefix { $0 != "Tests" }.joined(separator: "/").dropFirst()
 
     var dataStore: URL {
-        URL(fileURLWithPath: packageRootPath + "/MemoryUtilitiesTests/storage/data", isDirectory: false)
+        URL(fileURLWithPath: packageRootPath + "/Tests/MemoryUtilitiesTests/storage/data", isDirectory: false)
     }
 
     let fileManager = FileManager()
 
+    var manager: MemoryManager!
+
+    let raw: [UInt32] = [0, 0xDEADBEEF, 0, 0, 0, 0, 0, 0, 0]
+
     override func setUp() {
-        XCTAssertTrue(fileManager.createFile(atPath: dataStore.absoluteString, contents: nil))
+        _ = raw.withUnsafeBytes {
+            fileManager.createFile(atPath: dataStore.path, contents: Data($0))
+        }
+        manager = MemoryManager(location: dataStore, baseAddress: 0, size: 32)
+        XCTAssertNotNil(manager, "Error number: \(errno), page size: \(sysconf(Int32(_SC_PAGESIZE)))")
     }
 
     override func tearDown() {
+        manager = nil
         _ = try? fileManager.removeItem(at: dataStore)
     }
 
-    /// Test the property init initialises the stored properties correctly.
-    func testPropertyInit() {
-        let descriptor: Int32 = 5
-        let address: size_t = 0x40000000
-        let size: size_t = 0
-        var data: UInt32 = 1337
-        let memData = withUnsafeMutablePointer(to: &data) {
-            let manager = MemoryManager(
-                fileDescriptor: descriptor, memory: $0, physicalAddress: address, size: size
-            )
-            XCTAssertEqual(manager.fileDescriptor, descriptor)
-            XCTAssertEqual(manager.physicalAddress, address)
-            XCTAssertEqual(manager.size, size)
-            return $0.pointee
-        }
-        XCTAssertEqual(memData, data)
+    /// Test init sets stored properties correctly.
+    func testMMap() {
+        XCTAssertNotEqual(manager.fileDescriptor, 0)
+        XCTAssertEqual(manager.baseAddress, 0)
+        XCTAssertEqual(manager.size, 32)
+        XCTAssertEqual(manager.memory.pointee, 0)
+        XCTAssertEqual(manager.memory.advanced(by: 1).pointee, 0xDEADBEEF)
+    }
+
+    /// Test init fails for invalid parameters.
+    func testInvalidInit() {
+        XCTAssertNil(
+            MemoryManager(location: dataStore.appendingPathComponent("1234abcd"), baseAddress: 0, size: 8)
+        )
+        XCTAssertNil(MemoryManager(location: dataStore, baseAddress: -1, size: 8))
+        XCTAssertNil(MemoryManager(location: dataStore, baseAddress: 0, size: 0))
+        XCTAssertNil(MemoryManager(location: dataStore, baseAddress: 0, size: 3))
+        XCTAssertNil(MemoryManager(location: dataStore, baseAddress: 1, size: 4))
+    }
+
+    /// Test read returns correct data.
+    func testRead() {
+        XCTAssertEqual(manager.read(address: 4), 0xDEADBEEF)
+        XCTAssertEqual(manager.read(address: 8), 0)
+        XCTAssertEqual(manager.read(address: 24), 0)
+        XCTAssertNil(manager.read(address: 25))
+        XCTAssertNil(manager.read(address: 26))
+        XCTAssertNil(manager.read(address: 27))
+        XCTAssertEqual(manager.read(address: 28), 0)
+        XCTAssertNil(manager.read(address: 29))
+        XCTAssertNil(manager.read(address: 33))
+        XCTAssertNil(manager.read(address: 31))
+        XCTAssertNil(manager.read(address: 36))
+        manager.memory[2] = 0xFEEDBEEF
+        XCTAssertEqual(manager.read(address: 8), 0xFEEDBEEF)
+    }
+
+    /// Test multiple read returns correct data.
+    func testMultiRead() {
+        XCTAssertEqual(manager.read(address: 4, items: 2), [0xDEADBEEF, 0])
+        manager.memory[2] = 0xFEEDBEEF
+        XCTAssertEqual(manager.read(address: 4, items: 2), [0xDEADBEEF, 0xFEEDBEEF])
+        XCTAssertNil(manager.read(address: 9, items: 2))
+        XCTAssertNil(manager.read(address: 36, items: 2))
+        XCTAssertNil(manager.read(address: 28, items: 2))
+        XCTAssertNil(manager.read(address: 0, items: 10))
+        XCTAssertEqual(manager.read(address: 0, items: 2), [0, 0xDEADBEEF])
+    }
+
+    /// Test `isValidAddress` function correctly checks address range.
+    func testIsValidAddress() {
+        XCTAssertTrue(manager.isValidAddress(address: 0))
+        XCTAssertTrue(manager.isValidAddress(address: 4))
+        XCTAssertTrue(manager.isValidAddress(address: 8))
+        XCTAssertTrue(manager.isValidAddress(address: 28))
+        XCTAssertFalse(manager.isValidAddress(address: 32))
+        XCTAssertFalse(manager.isValidAddress(address: 9))
+        XCTAssertFalse(manager.isValidAddress(address: 3))
+        XCTAssertFalse(manager.isValidAddress(address: 36))
     }
 
 }

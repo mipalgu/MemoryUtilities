@@ -62,37 +62,42 @@ public final class MemoryManager {
 
     let memory: UnsafeMutablePointer<UInt32>
 
-    public let physicalAddress: size_t
+    public let baseAddress: size_t
 
     public let size: size_t
 
     public convenience init?(
         location: URL = URL(fileURLWithPath: "/dev/mem", isDirectory: false),
-        physicalAddress: off_t,
+        baseAddress: off_t,
         size: size_t,
         virtualAddress: UnsafeMutableRawPointer? = nil
     ) {
-        guard physicalAddress >= 0, size > 0, location.isFileURL, !location.hasDirectoryPath else {
+        guard
+            baseAddress >= 0, baseAddress % 4 == 0, size >= 4, location.isFileURL, !location.hasDirectoryPath
+        else {
             return nil
         }
-        let file = open(location.absoluteString, O_RDWR | O_SYNC)
+        let file = open(location.path, O_RDWR | O_SYNC)
         guard file != -1 else {
             return nil
         }
-        guard let pointer = mmap(
-            virtualAddress, size, PROT_READ | PROT_WRITE, MAP_SHARED_VALIDATE, file, physicalAddress
-        ) else {
+        guard
+            let pointer = mmap(
+                virtualAddress, size, PROT_READ | PROT_WRITE, MAP_SHARED_VALIDATE, file, baseAddress
+            ),
+            pointer != MAP_FAILED
+        else {
             close(file)
             return nil
         }
         let memory = pointer.assumingMemoryBound(to: UInt32.self)
-        self.init(fileDescriptor: file, memory: memory, physicalAddress: size_t(physicalAddress), size: size)
+        self.init(fileDescriptor: file, memory: memory, baseAddress: size_t(baseAddress), size: size)
     }
 
-    init(fileDescriptor: Int32, memory: UnsafeMutablePointer<UInt32>, physicalAddress: size_t, size: size_t) {
+    init(fileDescriptor: Int32, memory: UnsafeMutablePointer<UInt32>, baseAddress: size_t, size: size_t) {
         self.fileDescriptor = fileDescriptor
         self.memory = memory
-        self.physicalAddress = physicalAddress
+        self.baseAddress = baseAddress
         self.size = size
     }
 
@@ -102,36 +107,50 @@ public final class MemoryManager {
     }
 
     func isValidAddress(address: size_t) -> Bool {
-        address >= self.physicalAddress && address < self.physicalAddress + self.size
+        address % 4 == 0 && address >= self.baseAddress && address < self.baseAddress + self.size - 3
+    }
+
+    func performRead(address: size_t) -> UInt32 {
+        self.memory[baseAddress + (address - baseAddress) / 4]
+    }
+
+    func performWrite(address: size_t, value: UInt32) {
+        self.memory[baseAddress + (address - baseAddress) / 4] = value
     }
 
     public func read(address: size_t) -> UInt32? {
         guard self.isValidAddress(address: address) else {
             return nil
         }
-        return self.memory[address]
+        return performRead(address: address)
     }
 
     public func read(address: size_t, items: Int) -> [UInt32]? {
-        guard self.isValidAddress(address: address + size_t(items - 1)) else {
+        guard
+            self.isValidAddress(address: address + size_t(items * 4 - 4)),
+            self.isValidAddress(address: address)
+        else {
             return nil
         }
-        return (0..<items).map { self.memory[address + size_t($0)] }
+        return (0..<items).map { performRead(address: address + size_t($0 * 4)) }
     }
 
     public func write(address: size_t, value: UInt32) -> Bool {
         guard self.isValidAddress(address: address) else {
             return false
         }
-        self.memory[address] = value
+        performWrite(address: address, value: value)
         return true
     }
 
     public func write(address: size_t, values: [UInt32]) -> Bool {
-        guard self.isValidAddress(address: address + size_t(values.count - 1)) else {
+        guard
+            self.isValidAddress(address: address + size_t(values.count * 4 - 4)),
+            self.isValidAddress(address: address)
+        else {
             return false
         }
-        values.enumerated().forEach { self.memory[address + size_t($0)] = $1 }
+        values.enumerated().forEach { performWrite(address: address + size_t($0 * 4), value: $1) }
         return true
     }
 
