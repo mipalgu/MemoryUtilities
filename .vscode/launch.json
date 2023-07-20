@@ -1,0 +1,28 @@
+{
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "sourceLanguages": [
+                "swift"
+            ],
+            "name": "Debug MemoryUtilities",
+            "program": "${workspaceFolder:MemoryUtilities}/.build/debug/MemoryUtilities",
+            "args": [],
+            "cwd": "${workspaceFolder:MemoryUtilities}",
+            "preLaunchTask": "swift: Build Debug MemoryUtilities"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "sourceLanguages": [
+                "swift"
+            ],
+            "name": "Release MemoryUtilities",
+            "program": "${workspaceFolder:MemoryUtilities}/.build/release/MemoryUtilities",
+            "args": [],
+            "cwd": "${workspaceFolder:MemoryUtilities}",
+            "preLaunchTask": "swift: Build Release MemoryUtilities"
+        }
+    ]
+}
