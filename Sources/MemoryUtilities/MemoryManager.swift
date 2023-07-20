@@ -109,7 +109,7 @@ public final class MemoryManager {
         defer { close(file) }
         guard
             let pointer = mmap(
-                virtualAddress, size, PROT_READ | PROT_WRITE, MAP_SHARED_VALIDATE, file, baseAddress
+                virtualAddress, size, PROT_READ | PROT_WRITE, MAP_SHARED, file, baseAddress
             ),
             pointer != MAP_FAILED
         else {
