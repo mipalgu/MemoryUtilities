@@ -73,7 +73,12 @@ public final class MemoryManager {
         virtualAddress: UnsafeMutableRawPointer? = nil
     ) {
         guard
-            baseAddress >= 0, baseAddress % 4 == 0, size >= 4, location.isFileURL, !location.hasDirectoryPath
+            baseAddress >= 0,
+            baseAddress % 4 == 0,
+            size >= 4,
+            size % 4 == 0,
+            location.isFileURL,
+            !location.hasDirectoryPath
         else {
             return nil
         }
