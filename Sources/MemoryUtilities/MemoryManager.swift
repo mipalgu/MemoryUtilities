@@ -105,19 +105,6 @@ public final class MemoryManager {
         address >= self.physicalAddress && address < self.physicalAddress + self.size
     }
 
-    public func read<T>(address: size_t) -> T? {
-        let items = MemoryLayout<T>.size / 4 + (MemoryLayout<T>.size % 4 == 0 ? 0 : 1)
-        guard let data = self.read(address: address, items: items) else {
-            return nil
-        }
-        return data.withUnsafeBytes {
-            guard let base = $0.baseAddress else {
-                return nil
-            }
-            return base.assumingMemoryBound(to: T.self).pointee
-        }
-    }
-
     public func read(address: size_t) -> UInt32? {
         guard self.isValidAddress(address: address) else {
             return nil
@@ -146,19 +133,6 @@ public final class MemoryManager {
         }
         values.enumerated().forEach { self.memory[address + size_t($0)] = $1 }
         return true
-    }
-
-    public func write<T>(address: size_t, value: T) -> Bool {
-        withUnsafeBytes(of: value) {
-            let remainder = $0.count % 4
-            guard remainder != 0 else {
-                return self.write(address: address, values: [UInt32]($0.assumingMemoryBound(to: UInt32.self)))
-            }
-            let zeros = [UInt8](repeating: 0, count: 4 - remainder)
-            let newPointer = UnsafeRawBufferPointer(start: $0.baseAddress, count: $0.count + zeros.count)
-                .assumingMemoryBound(to: UInt32.self)
-            return self.write(address: address, values: [UInt32](newPointer))
-        }
     }
 
 }
