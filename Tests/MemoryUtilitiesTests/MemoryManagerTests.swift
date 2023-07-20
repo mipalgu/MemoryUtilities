@@ -161,4 +161,22 @@ final class MemoryManagerTests: XCTestCase {
         XCTAssertEqual(manager.memory[5], 0)
     }
 
+    /// Test multwrite correctly writes data.
+    func testMultiWrite() {
+        XCTAssertTrue(manager.write(address: 8, values: [0xFEEDBEEF, 0x8BADF00D]))
+        XCTAssertEqual(manager.memory[2], 0xFEEDBEEF)
+        XCTAssertEqual(manager.memory[3], 0x8BADF00D)
+        XCTAssertFalse(manager.write(address: 8, values: raw))
+    }
+
+    /// Test read and write together.
+    func testReadWrite() {
+        XCTAssertEqual(manager.read(address: 4), 0xDEADBEEF)
+        XCTAssertTrue(manager.write(address: 8, value: 0x8BADF00D))
+        XCTAssertEqual(manager.read(address: 8), 0x8BADF00D)
+        XCTAssertEqual(manager.read(address: 4, items: 2), [0xDEADBEEF, 0x8BADF00D])
+        XCTAssertTrue(manager.write(address: 12, values: [0xFEEDBEEF, 0x8BADF00D]))
+        XCTAssertEqual(manager.read(address: 12, items: 2), [0xFEEDBEEF, 0x8BADF00D])
+    }
+
 }
