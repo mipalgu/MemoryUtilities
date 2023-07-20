@@ -88,7 +88,6 @@ final class MemoryManagerTests: XCTestCase {
 
     /// Test init sets stored properties correctly.
     func testMMap() {
-        XCTAssertNotEqual(manager.fileDescriptor, 0)
         XCTAssertEqual(manager.baseAddress, 0)
         XCTAssertEqual(manager.size, 32)
         XCTAssertEqual(manager.memory.pointee, 0)

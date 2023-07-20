@@ -58,8 +58,6 @@ import Foundation
 
 public final class MemoryManager {
 
-    let fileDescriptor: Int32
-
     let memory: UnsafeMutablePointer<UInt32>
 
     public let baseAddress: size_t
@@ -86,21 +84,20 @@ public final class MemoryManager {
         guard file != -1 else {
             return nil
         }
+        defer { close(file) }
         guard
             let pointer = mmap(
                 virtualAddress, size, PROT_READ | PROT_WRITE, MAP_SHARED_VALIDATE, file, baseAddress
             ),
             pointer != MAP_FAILED
         else {
-            close(file)
             return nil
         }
         let memory = pointer.assumingMemoryBound(to: UInt32.self)
-        self.init(fileDescriptor: file, memory: memory, baseAddress: size_t(baseAddress), size: size)
+        self.init(memory: memory, baseAddress: size_t(baseAddress), size: size)
     }
 
-    init(fileDescriptor: Int32, memory: UnsafeMutablePointer<UInt32>, baseAddress: size_t, size: size_t) {
-        self.fileDescriptor = fileDescriptor
+    init(memory: UnsafeMutablePointer<UInt32>, baseAddress: size_t, size: size_t) {
         self.memory = memory
         self.baseAddress = baseAddress
         self.size = size
@@ -108,7 +105,6 @@ public final class MemoryManager {
 
     deinit {
         _ = munmap(UnsafeMutableRawPointer(memory), size)
-        close(self.fileDescriptor)
     }
 
     func isValidAddress(address: size_t) -> Bool {
