@@ -190,12 +190,13 @@ public final class MemoryManager {
     @inlinable
     public func read(address: size_t, items: Int) -> [UInt32]? {
         guard
-            self.isValidAddress(address: address + size_t(items * 4 - 4)),
+            items > 0,
+            self.isValidAddress(address: address + size_t(items) * 4 - 4),
             self.isValidAddress(address: address)
         else {
             return nil
         }
-        return (0..<items).map { performRead(address: address + size_t($0 * 4)) }
+        return (0..<items).map { performRead(address: address + size_t($0) * 4) }
     }
 
     /// Write a `value` to an `address`.
@@ -223,12 +224,13 @@ public final class MemoryManager {
     @discardableResult @inlinable
     public func write(address: size_t, values: [UInt32]) -> Bool {
         guard
-            self.isValidAddress(address: address + size_t(values.count * 4 - 4)),
+            !values.isEmpty,
+            self.isValidAddress(address: address + size_t(values.count) * 4 - 4),
             self.isValidAddress(address: address)
         else {
             return false
         }
-        values.enumerated().forEach { performWrite(address: address + size_t($0 * 4), value: $1) }
+        values.enumerated().forEach { performWrite(address: address + size_t($0) * 4, value: $1) }
         return true
     }
 

@@ -133,6 +133,8 @@ final class MemoryManagerTests: XCTestCase {
         XCTAssertNil(manager.read(address: 28, items: 2))
         XCTAssertNil(manager.read(address: 0, items: 10))
         XCTAssertEqual(manager.read(address: 0, items: 2), [0, 0xDEADBEEF])
+        XCTAssertNil(manager.read(address: 4, items: -1))
+        XCTAssertNil(manager.read(address: 4, items: 0))
     }
 
     /// Test `isValidAddress` function correctly checks address range.
@@ -166,6 +168,7 @@ final class MemoryManagerTests: XCTestCase {
         XCTAssertEqual(manager.memory[2], 0xFEEDBEEF)
         XCTAssertEqual(manager.memory[3], 0x8BADF00D)
         XCTAssertFalse(manager.write(address: 8, values: raw))
+        XCTAssertFalse(manager.write(address: 8, values: []))
     }
 
     /// Test read and write together.
