@@ -168,6 +168,7 @@ final class MemoryManagerTests: XCTestCase {
         XCTAssertEqual(manager.memory[2], 0xFEEDBEEF)
         XCTAssertEqual(manager.memory[3], 0x8BADF00D)
         XCTAssertFalse(manager.write(address: 8, values: raw))
+        XCTAssertFalse(manager.write(address: 8, values: []))
     }
 
     /// Test read and write together.
