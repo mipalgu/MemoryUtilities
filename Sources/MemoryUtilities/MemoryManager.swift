@@ -190,6 +190,7 @@ public final class MemoryManager {
     @inlinable
     public func read(address: size_t, items: Int) -> [UInt32]? {
         guard
+            items > 0,
             self.isValidAddress(address: address + size_t(items * 4 - 4)),
             self.isValidAddress(address: address)
         else {
